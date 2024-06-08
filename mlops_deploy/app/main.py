@@ -2,12 +2,11 @@ from flask import Flask ,request ,jsonify
 from textblob import TextBlob
 import nltk
 
-from googletrans import Translator
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 import pickle   #dump  #load
 from flask_basicauth import BasicAuth
-import os 
+from googletrans import Translator
 
 
 
@@ -34,8 +33,8 @@ lg = pickle.load(open('../../models/modelo.pkl','rb')) #lendo arquivo e atribuin
 
 app = Flask('__name__')
 
-app.config['BASIC_AUTH_USERNAME'] = os.environ.get('BASIC_AUTH_USERNAME')
-app.config['BASIC_AUTH_PASSWORD'] = os.environ.get('BASIC_AUTH_PASSWORD')
+app.config['BASIC_AUTH_USERNAME'] = 'matheus'
+app.config['BASIC_AUTH_PASSWORD'] = '12345'
 
 basic_auth = BasicAuth(app)
 #Definir rotas da API (endpoints)
@@ -46,14 +45,15 @@ def home():
 
 
 @app.route('/sentimento/<frase>') #receber info do usuário: Na própria URL
-# @basic_auth.required
+@basic_auth.required
 def sentimento(frase): #recebe frase vindo da URL
-    
+
+    tb = TextBlob(frase)
     tr= Translator()
     
     frase_en = tr.translate(frase,dest='en')
-    
-    tb_en = TextBlob(frase_en.text)
+    frase_en_txt = frase_en.text
+    tb_en = TextBlob(frase_en_txt)
     polaridade = tb_en.sentiment.polarity
     return "polaridade: {}".format(polaridade)
 
@@ -66,7 +66,7 @@ def cotacao():
     return jsonify(preco_prev[0])  #string retorno de API
 
 
-app.run(debug=True,host='0.0.0.0') #debug=True, restarta a execução no terminal. identifica alterações.   #host 0.0.0.0 para todos os ambientes
+app.run(debug=True,host='0.0.0.0') #debug=True, restarta a execução no terminal. identifica alterações. 
 
 
 #CUIDADO COM VERSÕES!
